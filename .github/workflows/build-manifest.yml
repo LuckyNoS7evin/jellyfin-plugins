@@ -1,0 +1,51 @@
+name: Build Combined Manifest
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [plugin-published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch and merge plugin manifests
+        run: |
+          COMBINED="[]"
+          while IFS= read -r url; do
+            echo "Fetching $url"
+            PLUGIN_MANIFEST=$(curl -sf "$url" || echo "[]")
+            COMBINED=$(echo "$COMBINED" "$PLUGIN_MANIFEST" | jq -s 'add // []')
+          done < <(jq -r '.[]' plugins.json)
+          echo "$COMBINED" | jq 'sort_by(.name)' > /tmp/manifest.json
+          echo "Combined manifest:"
+          cat /tmp/manifest.json
+
+      - name: Deploy to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git checkout gh-pages
+            git pull origin gh-pages
+          else
+            git checkout --orphan gh-pages
+            git rm -rf . --quiet || true
+          fi
+
+          cp /tmp/manifest.json manifest.json
+          git add manifest.json
+          git diff --staged --quiet || git commit -m "Update combined manifest [$(date -u +%Y-%m-%dT%H:%M:%SZ)]"
+          git push origin gh-pages
