@@ -16,6 +16,7 @@ https://luckynos7evin.github.io/jellyfin-plugins/manifest.json
 |--------|-------------|
 | [Missing Episodes](https://github.com/LuckyNoS7evin/jellyfin-missing-episode-plugin) | Displays a report of TV episodes missing from your library |
 | [Specials Filter](https://github.com/LuckyNoS7evin/jellyfin-specials-filter-plugin) | Removes Season 0 specials from configured libraries after each scan |
+| [HEIC Photos](https://github.com/LuckyNoS7evin/jellyfin-heic-plugin) | Shows HEIC/HEIF (iPhone) photos in photo libraries, converted with Jellyfin's ffmpeg when viewed |
 
 ## Adding a new plugin
 
